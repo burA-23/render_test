@@ -2,7 +2,7 @@
 # Dependencies
 node_modules/
 jspm_packages/
-
+/dist
 # Environment variables (contains secrets)
 .env
 .env.local
