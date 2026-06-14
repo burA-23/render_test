@@ -15,6 +15,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "start": "node --watch index.js",
     "test": "echo \"Error: Trillionaire\" && exit 1"
   },
   "dependencies": {
