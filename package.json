@@ -15,6 +15,8 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "build:ui": "rm -rf dist & cd ../notesappfrontend && npm run build && cp -r dist/ ../notesappbackend",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
     "start": "node --watch index.js",
     "test": "echo \"Error: Trillionaire\" && exit 1"
   },
