@@ -20,7 +20,6 @@ let notes = [
   },
 ]
 
-// this is what a middleware implementation intricacies looklike.
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
   console.log('Path:  ', request.path)
