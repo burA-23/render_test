@@ -1,8 +1,10 @@
+require('dotenv').config()
 const express = require('express')
+const Note  = require('./models/note')
 const app = express()
 app.use(express.static('dist'))
 
-let notes = [
+{/*let notes = [
   {
     id: '1',
     content: 'HTML is easy',
@@ -19,6 +21,11 @@ let notes = [
     important: true,
   },
 ]
+*/}
+
+
+//const Note = mongoose.model('Note', noteSchema)  - I anticipate that we have imported this so we need to define it differently.
+
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -34,14 +41,21 @@ app.use(requestLogger)
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
-
+// already changed
 app.get('/api/notes', (request, response) => {
-  response.json(notes)
+  Note.find({}).then(notes=>{
+    response.json(notes)
+  })
 })
 
+// we use Mongoose findById method.
 app.get('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  const note = notes.find((note) => note.id === id)
+  Note.findById(request.params.id).then(note =>{
+    response.json(note)
+  })
+})
+  {/*const id = request.params.id
+  const note = notes.find(note => note.id === id) // something needs to change over there. 
 
   if (note) {
     response.json(note)
@@ -50,11 +64,12 @@ app.get('/api/notes/:id', (request, response) => {
   }
 })
 
-const generateId = () => {
+{/*const generateId = () => {
   const maxId =
     notes.length > 0 ? Math.max(...notes.map((n) => Number(n.id))) : 0
   return String(maxId + 1)
 }
+*/}
 
 app.post('/api/notes', (request, response) => {
   const body = request.body
@@ -65,16 +80,16 @@ app.post('/api/notes', (request, response) => {
     })
   }
 
-  const note = {
+  const note = new Note({
     content: body.content,
     important: body.important || false,
-    id: generateId(),
-  }
+    //id: generateId(),
+  })
 
-  notes = notes.concat(note)
+  note.save().then(savedNote =>{
+    response.json(savedNote)
+  })
 
-  response.json(note)
-})
 
 app.delete('/api/notes/:id', (request, response) => {
   const id = request.params.id
@@ -89,7 +104,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = 3001 
+const PORT = process.env.PORT 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
