@@ -105,18 +105,18 @@ app.post('/api/notes', (request, response) => {
 
 app.delete('/api/notes/:id', (request, response, next) => {
   Note.findByIdAndDelete(request.params.id)
-    .then (=> result {
+    .then (result =>{
       response.status(204).end()
     })
     .catch(error => next(error))
 
 })
 
-app.put('/api/notes/:id', (request, response, next) = >{
+app.put('/api/notes/:id', (request, response, next) =>{
   const {content, importance} = request.body 
 
   Note.findById(request.params.id)
-    .then(note =>{
+    .then(note => {
       if(!note){
         response.status(404).end()
       }
