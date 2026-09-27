@@ -50,9 +50,19 @@ app.get('/api/notes', (request, response) => {
 
 // we use Mongoose findById method.
 app.get('/api/notes/:id', (request, response) => {
-  Note.findById(request.params.id).then(note =>{
-    response.json(note)
-  })
+  Note.findById(request.params.id)
+    .then(note =>{
+      if (note){
+        response.json(note)
+      } else{
+        response.status(404).end()
+      }
+    })
+    .catch(error =>{
+      console.log(error)
+      response.status(400).send({error: "Malformarted id"})
+    })
+    
 })
   {/*const id = request.params.id
   const note = notes.find(note => note.id === id) // something needs to change over there. 
@@ -79,7 +89,7 @@ app.post('/api/notes', (request, response) => {
       error: 'content missing',
     })
   }
-
+// where the Mongoose - Note constructor function is applied.
   const note = new Note({
     content: body.content,
     important: body.important || false,
@@ -93,11 +103,30 @@ app.post('/api/notes', (request, response) => {
 
 
 
-app.delete('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  notes = notes.filter((note) => note.id !== id)
+app.delete('/api/notes/:id', (request, response, next) => {
+  Note.findByIdAndDelete(request.params.id)
+    .then (=> result {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 
-  response.status(204).end()
+})
+
+app.put('/api/notes/:id', (request, response, next) = >{
+  const {content, importance} = request.body 
+
+  Note.findById(request.params.id)
+    .then(note =>{
+      if(!note){
+        response.status(404).end()
+      }
+      note.content = content 
+      note.importance = importance 
+      return note.save().then((updatedNote) =>{
+        response.json(updatedNote)
+      })
+    })
+    .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
@@ -105,6 +134,14 @@ const unknownEndpoint = (request, response) => {
 }
 
 app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) =>{
+  if(error.name === 'CastError'){
+    request.status(400).send({error: "Malformarted error!"})
+  }
+  next(error)
+}
+app.use(errorHandler)
 
 const port = process.env.PORT || 3001
 app.listen(port, '0.0.0.0', () => {
