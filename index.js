@@ -28,7 +28,7 @@ app.use(express.static('dist'))
 
 
 const requestLogger = (request, response, next) => {
-  console.log('Method:', request.method)
+  console.log('Method: ', request.method)
   console.log('Path:  ', request.path)
   console.log('Body:  ', request.body)
   console.log('---')
@@ -58,9 +58,7 @@ app.get('/api/notes/:id', (request, response) => {
         response.status(404).end()
       }
     })
-    .catch(error =>{
-      console.log(error)
-      response.status(400).send({error: "Malformarted id"})
+    .catch(error => next(error))
     })
     
 })
@@ -81,14 +79,14 @@ app.get('/api/notes/:id', (request, response) => {
 }
 */}
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
   const body = request.body
-
-  if (!body.content) {
+// Below we will have to ascend into a better validation approach, in the Mongoose definition in the Schema.
+  {/*if (!body.content) {
     return response.status(400).json({
       error: 'content missing',
     })
-  }
+  */}
 // where the Mongoose - Note constructor function is applied.
   const note = new Note({
     content: body.content,
@@ -99,6 +97,7 @@ app.post('/api/notes', (request, response) => {
   note.save().then(savedNote =>{
     response.json(savedNote)
   })
+  .catch(error => next(error))
 })
 
 
@@ -136,8 +135,11 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) =>{
+  console.error(error.message)
   if(error.name === 'CastError'){
     request.status(400).send({error: "Malformarted error!"})
+  } else if(error.name === 'ValidationError'){
+    return response.status(400).send({error: error.message})
   }
   next(error)
 }
