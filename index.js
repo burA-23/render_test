@@ -59,9 +59,9 @@ app.get('/api/notes/:id', (request, response) => {
       }
     })
     .catch(error => next(error))
-    })
-    
 })
+    
+
   {/*const id = request.params.id
   const note = notes.find(note => note.id === id) // something needs to change over there. 
 
